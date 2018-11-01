@@ -26,7 +26,16 @@ exprSpec = do
       [expr| let a = f b in g a |] `shouldBe` (Let (V "a")
                                                    (Apply (Var $ V "f") (Var $ V "b"))
                                                    (Apply (Var $ V "g") (Var $ V "a")))
+    it "anti-quotes for var" $
+      (let x = Var $ V "v" in [expr| f $var:x |]) `shouldBe` (let x = Var $ V "v" in (Apply (Var $ V "f") x))
+    it "anti-quotes for var (compare value directly)" $
+      (let x = Var $ V "v" in [expr| f $var:x |]) `shouldBe` (Apply (Var $ V "f") (Var $ V "v"))
 
+-- (
+--   (Apply
+--        (Var (V (((:) 'f') [])) )
+--        )
+--        x)
 
 -- runtime code:
 -- targetExpr =

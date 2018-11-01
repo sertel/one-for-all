@@ -7,6 +7,8 @@ import           Language.Haskell.TH.Quote
 import           Parser (parseExpr)
 import           Lang
 
+-- import           Debug.Trace
+
 quoteExprExp :: String -> TH.ExpQ
 quoteExprExp s =  do  loc <- TH.location
                       let pos =  (TH.loc_filename loc,
@@ -21,6 +23,7 @@ antiExprExp :: Expr -> Maybe (TH.Q TH.Exp)
 -- essentially splice this thing in. the function dataToExpQ will turn this into
 -- Haskell AST.
 antiExprExp  (AntiExpr v)     = Just $ TH.varE  (TH.mkName v)
+antiExprExp  (Var (AV v))     = Just $ TH.varE  (TH.mkName v)
 antiExprExp  _                = Nothing
 
 quoteExprPat :: String -> TH.PatQ
@@ -33,6 +36,7 @@ quoteExprPat s =  do  loc <- TH.location
 
 antiExprPat :: Expr -> Maybe (TH.Q TH.Pat)
 antiExprPat  (AntiExpr v)     = Just $ TH.varP  (TH.mkName v)
+antiExprPat  (Var (AV v))     = Just $ TH.varP  (TH.mkName v)
 antiExprPat  _                = Nothing
 
 expr  :: QuasiQuoter
