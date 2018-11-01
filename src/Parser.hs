@@ -1,8 +1,10 @@
-
 module Parser where
 
 import Data.Generics
 import Text.ParserCombinators.Parsec
+import Text.Parsec (parserTrace)
+
+import Debug.Trace
 
 import Lang
 
@@ -27,41 +29,67 @@ ident = lexeme $
      return $ c : cs
 
 var :: CharParser () Var
-var = do v <- ident
-         return $ V v
-  <|> do string "$var:"
-         v <- ident
-         return $ AV v
+var = do
+      -- parserTrace $ "parsing var expresssion ..."
+      v <- ident
+      -- traceM $ "found var: " ++ (show v)
+      return $ V v
+    <|> do
+      string "$var:"
+      v <- ident
+      return $ AV v
 
 expr :: CharParser () Expr
-expr = do es <- many1 aexp
-          return $ foldl1 Apply es
+expr = do
+  -- parserTrace $ "parsing expresssion ..."
+  es <- many1 aexp
+  return $ foldl1 Apply es
 
 lexpr :: CharParser () Expr
 lexpr = do
+  -- parserTrace "parsing let expresssion ..."
+
+  symbol "let"
+  -- parserTrace "found let ..."
+
   v <- lexeme var
-  lexeme $ symbol "="
-  e <- lexeme expr
-  lexeme $ symbol "in"
+  -- parserTrace "found var ..."
+
+  symbol "="
+  -- parserTrace "found = ..."
+
+  -- lesson learned: this works only of the first parser uses a choice to parse
+  -- the words. if it uses some sort of recursion and never dispatches then
+  -- this "end"-parser is never being called!
+  -- this is why `manyTill expr (try $ symbol "in")` did not work!
+  e <- foldl1 Apply <$> manyTill aexp (try $ symbol "in")
+  -- parserTrace "found e!"
+
+  -- e <- lexeme expr
+  -- parserTrace $ "found expr ..."
+
   ie <- lexeme expr
+  -- parserTrace "found in-expression ..."
+
   return $ Let v e ie
 
 antiExpr :: CharParser () Expr
 antiExpr = do
+  -- parserTrace "parsing anti-expresssion ..."
   string "$exp:"
   e <- ident -- just read the string in
   return $ AntiExpr e
 
 aexp :: CharParser () Expr
 aexp = -- (try $ var >>= (return . Var))
-  (try $ do v <- var
-            return $ Var v)
+      (try lexpr)
+  <|> do v <- var
+         return $ Var v
   <|> do symbol "\\"
          v <- lexeme var
-         lexeme $ symbol "->"
+         symbol "->"
          e <- expr
          return $ Lambda v e
-  <|> lexpr
   <|> antiExpr
   <|> parens expr
 

@@ -14,4 +14,8 @@ data Expr = Var Var
           | Let Var Expr Expr
           -- anti quotes
           | AntiExpr String
-          deriving (Show, Typeable, Data)
+          deriving (Show, Typeable, Data, Eq)
+
+
+class ConvertUntypedLambda a where
+  convert:: Expr -> a
