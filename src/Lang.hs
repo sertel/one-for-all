@@ -28,7 +28,7 @@ type ReferencedLambdaApply = Expr -- id 7
 type ActualArgs = [Expr]
 
 collectFnCall :: Expr -> (Either InlinedLambdaApply ReferencedLambdaApply, ActualArgs)
-collectFnCall (Apply v@(Binding _) e) = (Left v, [e])
-collectFnCall (Apply l@(Lambda _ _) e) = (Right l, [e])
+collectFnCall (Apply l@(Lambda _ _) e) = (Left l, [e])
+collectFnCall (Apply v@(Binding _) e) = (Right v, [e])
 collectFnCall (Apply e1 e2) = second (++ [e2]) $ collectFnCall e1
 collectFnCall _ = undefined
