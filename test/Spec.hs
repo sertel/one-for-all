@@ -5,6 +5,10 @@ import Test.Hspec
 import Quote
 import Lang
 
+-- import Language.Rust.Syntax
+-- import Language.Rust.Quote as Rust
+
+import Debug.Trace
 
 main :: IO ()
 main = hspec $ do
@@ -17,25 +21,22 @@ exprSpec :: Spec
 exprSpec = do
   describe "Testing the expression language" $ do
     it "variable" $
-      [expr| v |] `shouldBe` (Var $ V "v")
+      [expr| v |] `shouldBe` (Binding $ V "v")
     it "function call" $
-      [expr| f v |] `shouldBe` (Apply (Var $ V "f") (Var $ V "v"))
+      [expr| f v |] `shouldBe` (Apply (Binding $ V "f") (Binding $ V "v"))
     it "lambda" $
-      [expr| \v -> f v |] `shouldBe` (Lambda (V "v") (Apply (Var $ V "f") (Var $ V "v")))
+      [expr| \v -> f v |] `shouldBe` (Lambda (V "v") (Apply (Binding $ V "f") (Binding $ V "v")))
     it "let" $
       [expr| let a = f b in g a |] `shouldBe` (Let (V "a")
-                                                   (Apply (Var $ V "f") (Var $ V "b"))
-                                                   (Apply (Var $ V "g") (Var $ V "a")))
+                                                   (Apply (Binding $ V "f") (Binding $ V "b"))
+                                                   (Apply (Binding $ V "g") (Binding $ V "a")))
     it "anti-quotes for var" $
-      (let x = Var $ V "v" in [expr| f $var:x |]) `shouldBe` (let x = Var $ V "v" in (Apply (Var $ V "f") x))
+      (let x = Binding $ V "v" in [expr| f $var:x |]) `shouldBe` (let x = Binding $ V "v" in (Apply (Binding $ V "f") x))
     it "anti-quotes for var (compare value directly)" $
-      (let x = Var $ V "v" in [expr| f $var:x |]) `shouldBe` (Apply (Var $ V "f") (Var $ V "v"))
+      (let x = Binding $ V "v" in [expr| f $var:x |]) `shouldBe` (Apply (Binding $ V "f") (Binding $ V "v"))
 
--- (
---   (Apply
---        (Var (V (((:) 'f') [])) )
---        )
---        x)
+    -- it "Rust antiquotes" $
+    --   (let p = [Rust.stmt| let y = f(a); |] in traceShowId p ) `shouldBe` ([Rust.stmt| let y = f(); |])
 
 -- runtime code:
 -- targetExpr =
@@ -59,4 +60,27 @@ exprSpec = do
 --   |]
 
 -- operator code:
--- TODO
+-- TODO terminate recursion and send off size
+-- [expr|
+--   let smapFun = (\(dataInChan, dataOutChan, sizeOutChan) ->
+--                     let data       = dataInChan ()
+--                     let count      = 0 in
+--                     let handleData = (\(d) -> dataOutChan d)
+--                     let getData    = (\(xs, sentCount) -> let c   = get xs in
+--                                                           let x   = nth 0 c in
+--                                                           let xs' = nth 1 c in
+--                                                           let _   = handleData x in
+--                                                             handleData xs' (add sentCount 1))
+--                       getData data 0
+--                   )
+-- |]
+--
+-- [expr|
+--   let select = (\(selectInChan, trueBranchChan, falseBranchChan, outChan) ->
+--                     let trueBranchExecuted = selectInChan () in
+--                     let data = if trueBranchExecuted
+--                                then trueBranchChan ()
+--                                else falseBranchChan () in
+--                       outChan data
+--                   )
+-- |]

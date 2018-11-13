@@ -24,6 +24,7 @@ dependencies:
 - parsec
 - syb
 - template-haskell
+- language-rust
 
 default-extensions:
 - FlexibleContexts

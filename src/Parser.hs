@@ -84,7 +84,7 @@ aexp :: CharParser () Expr
 aexp = -- (try $ var >>= (return . Var))
       (try lexpr)
   <|> do v <- var
-         return $ Var v
+         return $ Binding v
   <|> do symbol "\\"
          v <- lexeme var
          symbol "->"
