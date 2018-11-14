@@ -25,6 +25,8 @@ dependencies:
 - syb
 - template-haskell
 - language-rust
+- prettyprinter
+- text
 
 default-extensions:
 - FlexibleContexts

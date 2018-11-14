@@ -5,8 +5,14 @@ module Convert.Rust where
 import           Language.Rust.Syntax
 import           Language.Rust.Data.Ident
 import           Language.Rust.Data.Position
+import           Language.Rust.Pretty
 
 import qualified Lang as L
+
+import qualified Data.Text.Prettyprint.Doc as PP
+import           Data.Text.Prettyprint.Doc.Render.Text (renderIO, renderLazy)
+import           Data.Text.Lazy (Text)
+import           System.IO
 
 -- noSpan = Span NoPosition NoPosition
 noSpan = ()
@@ -52,3 +58,21 @@ instance L.ConvertUntypedLambda (Expr ()) where
                     noSpan) -- no types (yet?)
             (L.convert e)
             noSpan
+
+
+
+unparseToDocStream :: (Resolve a, Pretty a) => a -> PP.SimpleDocStream ann
+unparseToDocStream = (PP.layoutPretty layoutOptions) . PP.unAnnotate . pretty'
+  where
+    pageWidth = 80
+    layoutOptions = PP.LayoutOptions { PP.layoutPageWidth = PP.AvailablePerLine pageWidth 1 }
+
+
+unparseToText :: (Resolve a, Pretty a) => a -> Text
+unparseToText = renderLazy . unparseToDocStream
+
+unparseToStdOut :: (Resolve a, Pretty a) => a -> IO ()
+unparseToStdOut = (renderIO System.IO.stdout) . unparseToDocStream
+
+unparseToFile :: (Resolve a, Pretty a) => String -> a -> IO ()
+unparseToFile fileName expr = withFile fileName WriteMode (\h -> renderIO h $ unparseToDocStream expr)
