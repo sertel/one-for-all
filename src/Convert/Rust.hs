@@ -18,6 +18,8 @@ import           System.IO
 noSpan = ()
 
 instance L.ConvertUntypedLambda (Expr ()) where
+  supportsDirectLambdaApplication _ = False
+
   -- Rust is statement-oriented
   convert (L.Let (L.V v) e ie) =
     let ec   = L.convert e

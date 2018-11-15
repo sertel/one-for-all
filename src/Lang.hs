@@ -19,6 +19,7 @@ data Expr = Binding Var
 
 
 class ConvertUntypedLambda a where
+  supportsDirectLambdaApplication :: a -> Bool
   convert :: Expr -> a
 
 
