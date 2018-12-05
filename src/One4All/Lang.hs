@@ -12,6 +12,11 @@ data Var
   | AV String
   deriving (Show, Eq, Typeable, Data)
 
+data Literal
+  = IntegerLit Int
+  | UnitLit
+  deriving (Show, Eq, Typeable, Data)
+
 data Expr
   = Binding Var
   | Apply Expr
@@ -23,6 +28,7 @@ data Expr
         Expr
           -- anti quotes
   | AntiExpr String
+  | Lit Literal
   deriving (Show, Typeable, Data, Eq)
 
 class ConvertUntypedLambda a where

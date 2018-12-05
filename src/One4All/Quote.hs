@@ -38,8 +38,8 @@ antiExprPat (AntiExpr v) = Just $ TH.varP (TH.mkName v)
 antiExprPat (Binding (AV v)) = Just $ TH.varP (TH.mkName v)
 antiExprPat _ = Nothing
 
-expr :: QuasiQuoter
-expr =
+o4a :: QuasiQuoter
+o4a =
   QuasiQuoter
     { quoteExp = quoteExprExp
     , quotePat = quoteExprPat

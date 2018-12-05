@@ -17,6 +17,9 @@ large = upper
 
 idchar = small <|> large <|> digit <|> char '\''
 
+num :: CharParser () String
+num = many1 digit
+
 lexeme p = do
   x <- p
   spaces
@@ -72,6 +75,13 @@ lexpr
   -- parserTrace "found in-expression ..."
   return $ Let v e ie
 
+litExpr :: CharParser () Expr
+litExpr =
+  (try $ do
+     symbol "()"
+     return $ Lit UnitLit) <|>
+  (fmap (Lit . IntegerLit . read) num)
+
 antiExpr :: CharParser () Expr
 antiExpr
   -- parserTrace "parsing anti-expresssion ..."
@@ -92,6 +102,7 @@ aexp -- (try $ var >>= (return . Var))
       e <- expr
       return $ Lambda v e) <|>
   antiExpr <|>
+  litExpr <|>
   parens expr
 
 parseExpr :: Monad m => (String, Int, Int) -> String -> m Expr

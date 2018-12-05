@@ -17,7 +17,7 @@ rustSpec :: Spec
 rustSpec = do
   describe "Testing the conversion to Rust" $ do
     it "simple let expression" $
-      let langExpr = [expr| let b = foo a in bar b |]
+      let langExpr = [o4a| let b = foo a in bar b |]
           rustExpr = (convert langExpr) :: Rust.Expr ()
           expectedRustExpr = void [RustQ.expr| { let b = foo(a); bar(b) } |]
        in rustExpr `shouldBe` expectedRustExpr
