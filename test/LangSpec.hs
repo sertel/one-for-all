@@ -31,3 +31,9 @@ langSpec = do
       (let x = Binding $ V "v"
         in [o4a| f $var:x |]) `shouldBe`
       (Apply (Binding $ V "f") (Binding $ V "v"))
+    it "unit literal" $
+      [o4a| let chan = channel () in chan|] `shouldBe`
+      (Let
+         (V "chan")
+         (Apply (Binding $ V "channel") (Lit UnitLit))
+         (Binding $ V "chan"))
