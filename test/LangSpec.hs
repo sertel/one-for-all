@@ -22,6 +22,13 @@ langSpec = do
          (V "a")
          (Apply (Binding $ V "f") (Binding $ V "b"))
          (Apply (Binding $ V "g") (Binding $ V "a")))
+    it "nested let" $
+      [o4a| let a = f b in
+            let c = g a in
+            c
+        |] `shouldBe`
+      (Let (V "a") (Apply (Binding $ V "f") (Binding $ V "b")) $
+       Let (V "c") (Apply (Binding $ V "g") (Binding $ V "a")) $ Binding $ V "c")
     it "anti-quotes for var" $
       (let x = Binding $ V "v"
         in [o4a| f $var:x |]) `shouldBe`
@@ -32,8 +39,14 @@ langSpec = do
         in [o4a| f $var:x |]) `shouldBe`
       (Apply (Binding $ V "f") (Binding $ V "v"))
     it "unit literal" $
-      [o4a| let chan = channel () in chan|] `shouldBe`
+      [o4a| let chan = channel () in chan |] `shouldBe`
       (Let
          (V "chan")
          (Apply (Binding $ V "channel") (Lit UnitLit))
+         (Binding $ V "chan"))
+    it "int literal" $
+      [o4a| let chan = channel 0 in chan |] `shouldBe`
+      (Let
+         (V "chan")
+         (Apply (Binding $ V "channel") (Lit $ IntegerLit 0))
          (Binding $ V "chan"))

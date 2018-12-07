@@ -80,7 +80,7 @@ litExpr =
   (try $ do
      symbol "()"
      return $ Lit UnitLit) <|>
-  (fmap (Lit . IntegerLit . read) num)
+  (fmap (Lit . IntegerLit . read) $ lexeme num)
 
 antiExpr :: CharParser () Expr
 antiExpr
